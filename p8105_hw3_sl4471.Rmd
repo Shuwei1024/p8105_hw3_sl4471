@@ -1,6 +1,8 @@
 ---
-title: "Untitled"
-output: html_document
+title: "p8105_hw3_sl4471"
+author: Shuwei Liu sl4471
+date: 10.13.2018
+output: github_document
 ---
 
 
@@ -98,3 +100,26 @@ ggplot(avearge_proportion_df, aes(x = year, y = mean, color = state)) +
 ```
  
 Each state has fairly same average proportion for each response. The "Very good" Response has the highest proportion while the "Poor" response has the least. 
+
+## Problem2
+
+## 1.1 Description of dataset
+
+
+```{r import_data}
+data("instacart")
+str(instacart)
+dim(instacart)
+```
+
+We can use "str()" and "dim" to look through the dataset. This a "tbl_df" data with 1384617 rows and 15 columns. It includes "order_id", "product_id", "add_to_cart_order", "reordered", "user_id", "eval_set", "order_number", "order_dow", "order_hour_of_day", "days_since_prior_order", "product_name", "aisle_id", "department_id", "aisle" and "department" variables. Basically, it tells us "who" order "what" kind of product under "which" aisle and department if it is reordered or not. To be specific, just take the first row as an example, the order id "1" shows that  customer "112108" reordered "Bulgarian Yogurt" whose id is "49302" under the yogurt aisle whose id is "120" from the "dairy eggs" department whose id is "16" on "Thursday" as this customers first order this time. 
+```{r}
+count(distinct(instacart, aisle))
+instacart %>% 
+  janitor::clean_names() %>% 
+  group_by(aisle) %>% 
+  summarize(n_obs = n()) %>% 
+  arrange(desc(n_obs))
+```
+
+
