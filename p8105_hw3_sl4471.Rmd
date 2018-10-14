@@ -96,7 +96,8 @@ ggplot(avearge_proportion_df, aes(x = year, y = mean, color = state)) +
     y = "Average proportion",
     caption = "Data from p8105.datasets") +
   theme_bw() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45))
 ```
  
 Each state has fairly same average proportion for each response. The "Very good" Response has the highest proportion while the "Poor" response has the least. 
@@ -278,4 +279,73 @@ ny_noaa_tidy %>%
 
 Because the unit of "prcp" is "tenths of mm", the units of "tmax" and "tmin" are  "tenths of degrees C", I change the unit more reasonable. 
 
-The most commonly observed value of snowfall is 0. 
+The most commonly observed value of snowfall is 0. Snowfall only takes place in winter, so for the most time of a year it would not happen.
+
+## 3.3 The plots
+
+```{r average_max_temperature, fig.width = 6, fig.asp = 1, out.width = "90%"}
+ny_noaa_meantmax = 
+  ny_noaa_tidy %>% 
+  select(id, year, month, tmax) %>% 
+  filter(month %in% c("01", "07")) %>% 
+  mutate(month = recode(month, `01` = "January", `07` = "July")) %>% 
+  group_by(id, month) %>% 
+  summarize(tmax_mean = mean(tmax, na.rm = TRUE))
+
+ggplot(ny_noaa_meantmax, aes(y = tmax_mean)) +
+  geom_boxplot() +
+  facet_grid(~month) +
+  labs(
+    title = "The average max temperature in January and in July across years",
+    y = "The average max temperature(ºC)",
+    caption = "Data from the p8105.datasets"
+  ) +
+    theme_bw()
+```
+
+We can use "boxplot.stats()" function to check the outliers.
+
+```{r outlier}
+ny_noaa_meantmax %>%
+  filter(month == "January") %>% 
+  .$tmax_mean %>% 
+  boxplot.stats()
+
+ny_noaa_meantmax %>%
+  filter(month == "July") %>% 
+  .$tmax_mean %>% 
+  boxplot.stats()
+```
+
+Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+
+```{r two_panel_plot}
+tmax_tmin = 
+  ggplot(ny_noaa_tidy, aes(x = tmax, y = tmin)) + 
+  geom_hex() +
+  labs(
+    title = "tmax VS tmin for the full dataset",
+    x = "Maxiumum daily temperature (ºC)",
+    y = "Minimum daily temperature (ºC)",
+    caption = "Data from the p8105.datasets"
+  ) +
+  viridis::scale_color_viridis(discrete = TRUE) +
+  theme_bw() +
+  theme(legend.position = "right") 
+
+distribution_snow =
+  ny_noaa_tidy %>% 
+  filter(snow > 0, snow < 100) %>% 
+  ggplot(aes(x = year, y = snow)) + 
+  geom_boxplot() +
+  labs(
+    title = "The distribution of snowfall values greater than 0 and less than 100",
+    x = "Year",
+    y = "Snowfall value",
+    caption = "Data from the p8105.datasets"
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45))
+
+(tmax_tmin)/(distribution_snow)
+```
