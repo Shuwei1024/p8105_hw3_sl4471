@@ -291,18 +291,20 @@ ny_noaa_meantmax =
   select(id, year, month, tmax) %>% 
   filter(month %in% c("01", "07")) %>% 
   mutate(month = recode(month, `01` = "January", `07` = "July")) %>% 
-  group_by(id, month) %>% 
+  group_by(id, year, month) %>% 
   summarize(tmax_mean = mean(tmax, na.rm = TRUE))
 
-ggplot(ny_noaa_meantmax, aes(y = tmax_mean)) +
+ggplot(ny_noaa_meantmax, aes(x = year, y = tmax_mean)) +
   geom_boxplot() +
   facet_grid(~month) +
   labs(
     title = "The average max temperature in January and in July across years",
+    x = "Year", 
     y = "The average max temperature(ºC)",
     caption = "Data from the p8105.datasets"
   ) +
-    theme_bw()
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45))
 ```
 
 We can use "boxplot.stats()" function to check the outliers.
@@ -321,8 +323,6 @@ ny_noaa_meantmax %>%
 
 From the plot, we can compare the average of max temperature on January with that on July across years. We the tell the basic descripttive data of each including range, Q1, median, Q3.
 
-The outliers of January are -9.983721, -8.021429, 5.666129 and -12.200000ºC.
-The outliers of July are 23.51538, 23.51621, 23.33546, 31.47204, 22.41384, 23.53814ºC.
 
 ### 3.3.2
 
@@ -343,15 +343,18 @@ tmax_tmin =
 distribution_snow =
   ny_noaa_tidy %>% 
   filter(snow > 0, snow < 100) %>% 
-  ggplot(aes(x = year, y = snow)) + 
-  geom_boxplot() +
+  ggplot(aes(x = snow, fill = year)) + 
+  geom_density() +
   labs(
     title = "The distribution of snowfall values greater than 0 and less than 100",
-    x = "Year",
-    y = "Snowfall value",
+    x = "Snowfall value",
+    y = "Density",
     caption = "Data from the p8105.datasets"
   ) +
   theme_bw() +
+  theme(legend.position = "bottom") +
+  viridis::scale_color_viridis(
+    name = "year") +
   theme(axis.text.x = element_text(angle = 45))
 
 (tmax_tmin)/(distribution_snow)
